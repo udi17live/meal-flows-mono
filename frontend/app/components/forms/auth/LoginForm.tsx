@@ -12,8 +12,11 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { useState } from "react";
+import MFButtonSecondary from "../../buttons/MFButtonSecondary";
+import SeparatorWithText from "../../SeparatorWIthText";
 
 export default function LoginForm() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   return (
     <div className="flex flex-col space-y-4 w-full">
@@ -50,7 +53,17 @@ export default function LoginForm() {
           </InputGroupAddon>
         </InputGroup>
       </div>
-      <MFButton label="Login" trailingIcon={ArrowRight} />
+      <div className="flex flex-col gap-8">
+        <MFButton label="Login" trailingIcon={ArrowRight} />
+        <SeparatorWithText text="OR" />
+        <MFButtonSecondary
+          label="Register your Cloud Kitchen"
+          trailingIcon={ArrowRight}
+          onClick={() => {
+            router.push("/admin/register");
+          }}
+        />
+      </div>
     </div>
   );
 }

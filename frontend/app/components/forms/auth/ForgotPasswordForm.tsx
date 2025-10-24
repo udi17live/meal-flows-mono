@@ -5,6 +5,8 @@ import { Label } from "@radix-ui/react-label";
 import MFButton from "../../buttons/MFButton";
 import { ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
+import SeparatorWithText from "../../SeparatorWIthText";
+import MFButtonSecondary from "../../buttons/MFButtonSecondary";
 
 export default function ForgotPasswordForm() {
   const router = useRouter();
@@ -19,18 +21,26 @@ export default function ForgotPasswordForm() {
           className="w-full px-6 py-6 rounded"
         />
       </div>
-      <MFButton label="Send reset Link" trailingIcon={ArrowRight} />
-      <MFButton
-        label="Back to Login"
-        trailingIcon={ArrowRight}
-        bgColor="bg-gray-200"
-        textColor="text-mf-blue"
-        bgColorHover="hover:bg-gray-400/90"
-        textColorHover="hover:opacity-90"
-        onClick={() => {
-          router.push("/admin/login");
-        }}
-      />
+      <div className="flex flex-col gap-8">
+        <MFButton label="Send reset Link" trailingIcon={ArrowRight} />
+        <SeparatorWithText text="OR" />
+        <div className="flex flex-col gap-4">
+          <MFButtonSecondary
+            label="Login"
+            trailingIcon={ArrowRight}
+            onClick={() => {
+              router.push("/admin/login");
+            }}
+          />
+          <MFButtonSecondary
+            label="Register your Kitchen"
+            trailingIcon={ArrowRight}
+            onClick={() => {
+              router.push("/admin/register");
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 }
