@@ -1,0 +1,30 @@
+{
+  "text_constants": {
+    "login_screen": {
+      "label": "Login Screen",
+      "components": {
+        "login_title": {
+          "label": "Login title",
+          "text": "Welcome Back, Please Login"
+        },
+        "login_input_labels": {
+          "label": "Login Input Labels",
+          "components": {
+            "login_email_label": {
+              "label": "Email label",
+              "text": "Email"
+            },
+            "login_password_label": {
+              "label": "Password label",
+              "text": "Password"
+            },
+            "login_forgot_password_label": {
+              "label": "Forgot password label",
+              "text": "Forgot Password?"
+            }
+          }
+        }
+      }
+    }
+  }
+}
