@@ -23,62 +23,22 @@ import { useForm, FormProvider, Controller } from "react-hook-form";
 import { onboardingSchema } from "@/app/schemas/onboarding";
 import { zodResolver } from "@hookform/resolvers/zod";
 import FormFieldErrors from "../FormFieldErrors";
-import z from "zod";
-
-// @Todo Fetch and Pass
-const cuisines = [
-  {
-    value: "sri-lankan",
-    label: "Sri Lankan",
-  },
-  {
-    value: "indian",
-    label: "Indian",
-  },
-  {
-    value: "chinese",
-    label: "Chinese",
-  },
-  {
-    value: "italian",
-    label: "Italian",
-  },
-  {
-    value: "thai",
-    label: "Thai",
-  },
-  {
-    value: "japanese",
-    label: "Japanese",
-  },
-  {
-    value: "middle-eastern",
-    label: "Middle Eastern",
-  },
-  {
-    value: "american",
-    label: "American",
-  },
-  {
-    value: "mexican",
-    label: "Mexican",
-  },
-  {
-    value: "fusion",
-    label: "Fusion",
-  },
-];
+import z, { string } from "zod";
+import { acceptedFileExts, cuisineTypes } from "@/app/constants";
+import FormOutputDisplay from "../FormOutputDisplay";
 
 export default function RegisterOnboardingForm() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [isCovered, setIsCovered] = useState(true);
+  const [isCoveredPW1, setIsCoveredPW1] = useState(true);
+  const [isCoveredPW2, setIsCoveredPW2] = useState(true);
   const [currentStep, setCurrentStep] = useState<number>(1);
 
   const form = useForm<z.infer<typeof onboardingSchema>>({
     resolver: zodResolver(onboardingSchema),
     mode: "onChange",
     reValidateMode: "onChange",
+    shouldUnregister: false,
     defaultValues: {
       restaurantName: "",
       restaurantEmail: "",
@@ -87,13 +47,14 @@ export default function RegisterOnboardingForm() {
       managerName: "",
       managerEmail: "",
       managerPhone: "",
-      dataBRFile: undefined as unknown as File,
-      dataIDFile: undefined as unknown as File,
+      dataBRFile: null,
+      dataIDFile: null,
       password1: "",
       password2: "",
     },
   });
-  const { watch, setValue, formState } = form;
+  const { watch, setValue, formState, handleSubmit, setError, clearErrors } =
+    form;
   const values = watch();
 
   // Validate Each Step
@@ -128,12 +89,29 @@ export default function RegisterOnboardingForm() {
     })
     .safeParse(values).success;
 
-  const acceptedFileExts: string[] = [
-    "image/jpeg",
-    "image/jpg",
-    "image/png",
-    "application/pdf",
-  ];
+  const isPasswordMatched = () => {
+    return values.password1 === values.password2;
+  };
+
+  const isValidPasswordSet = () => {
+    if (!isStep4Valid) return false;
+    return isPasswordMatched();
+  };
+
+  const handleNextStepFromStep4 = () => {
+    const isMatched = isPasswordMatched();
+
+    if (!isMatched) {
+      setError("password2", {
+        type: "manual",
+        message: "Passwords did not match",
+      });
+      return;
+    }
+
+    clearErrors("password2");
+    setCurrentStep(5);
+  };
 
   const isNextButtonDisabled = (currentStep: number) => {
     switch (currentStep) {
@@ -148,9 +126,17 @@ export default function RegisterOnboardingForm() {
     }
   };
 
+  const onSubmit = (values: z.infer<typeof onboardingSchema>) => {
+    console.log(values);
+    alert("Submitted");
+  };
+
   return (
     <FormProvider {...form}>
-      <form className="flex flex-col space-y-4 w-full">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="flex flex-col space-y-4 w-full"
+      >
         {currentStep == 1 ? (
           <>
             <h3 className="text-2xl font-bold uppercase">Restaurant Details</h3>
@@ -188,6 +174,7 @@ export default function RegisterOnboardingForm() {
               <Label htmlFor="restaurant-type">Type*</Label>
               <Controller
                 control={form.control}
+                key="restaurantType"
                 name="restaurantType"
                 render={({ field }) => {
                   return (
@@ -216,7 +203,7 @@ export default function RegisterOnboardingForm() {
             <div className="flex flex-col w-full space-y-3">
               <Label htmlFor="category">Cuisine*</Label>
               <MFComboBox
-                options={cuisines}
+                options={cuisineTypes}
                 onSelect={(value) =>
                   setValue("restaurantCuisine", value, {
                     shouldDirty: true,
@@ -328,6 +315,7 @@ export default function RegisterOnboardingForm() {
             <div className="flex flex-col w-full space-y-3">
               <Label htmlFor="dataBRFile">Business Registration*</Label>
               <Controller
+                key="dataBRFile"
                 name="dataBRFile"
                 control={form.control}
                 render={({ field }) =>
@@ -346,10 +334,14 @@ export default function RegisterOnboardingForm() {
                   )
                 }
               />
+              {formState.errors.dataBRFile && (
+                <FormFieldErrors error={formState.errors.dataBRFile.message} />
+              )}
             </div>
             <div className="flex flex-col w-full space-y-3">
               <Label htmlFor="dataIDFile">Manager NIC/Passport*</Label>
               <Controller
+                key="dataIDFile"
                 name="dataIDFile"
                 control={form.control}
                 render={({ field }) =>
@@ -368,6 +360,9 @@ export default function RegisterOnboardingForm() {
                   )
                 }
               />
+              {formState.errors.dataIDFile && (
+                <FormFieldErrors error={formState.errors.dataIDFile.message} />
+              )}
             </div>
             <div className="flex w-full space-y-3 mt-4 gap-4">
               <div className="w-1/2">
@@ -415,34 +410,42 @@ export default function RegisterOnboardingForm() {
             <div className="flex flex-col w-full space-y-3">
               <Label htmlFor="password1">Password*</Label>
               <Controller
+                key="password1"
                 name="password1"
                 control={form.control}
                 render={({ field }) => (
                   <MFPasswordInput
-                    isCovered={isCovered}
-                    setIsCovered={setIsCovered}
-                    value={field.value}
+                    isCovered={isCoveredPW1}
+                    setIsCovered={setIsCoveredPW1}
+                    value={typeof field.value === "string" ? field.value : ""}
                     onChange={field.onChange}
                     placeholder="Enter your password"
                   />
                 )}
               />
+              {formState.errors.password1 && (
+                <FormFieldErrors error={formState.errors.password1.message} />
+              )}
             </div>
             <div className="flex flex-col w-full space-y-3">
               <Label htmlFor="password2">Confirm Password*</Label>
               <Controller
+                key="password2"
                 name="password2"
                 control={form.control}
                 render={({ field }) => (
                   <MFPasswordInput
-                    isCovered={isCovered}
-                    setIsCovered={setIsCovered}
-                    value={field.value}
+                    isCovered={isCoveredPW2}
+                    setIsCovered={setIsCoveredPW2}
+                    value={typeof field.value === "string" ? field.value : ""}
                     onChange={field.onChange}
                     placeholder="Enter your password"
                   />
                 )}
               />
+              {formState.errors.password2 && (
+                <FormFieldErrors error={formState.errors.password2.message} />
+              )}
             </div>
             <div className="flex w-full space-y-3 mt-4 gap-4">
               <div className="w-1/2">
@@ -461,9 +464,7 @@ export default function RegisterOnboardingForm() {
                   trailingIcon={ArrowRight}
                   className="w-full"
                   disabled={isNextButtonDisabled(currentStep)}
-                  onClick={() => {
-                    setCurrentStep(5);
-                  }}
+                  onClick={handleNextStepFromStep4}
                 />
               </div>
             </div>
@@ -474,6 +475,66 @@ export default function RegisterOnboardingForm() {
               Confirm your details
             </h3>
 
+            <div className="max-h-[700px] overflow-scroll">
+              <h4 className="text-xl font-bold mt-4">Restaurant Details</h4>
+
+              <FormOutputDisplay
+                label="Restaurant Name"
+                value={values.restaurantName}
+              />
+              <FormOutputDisplay
+                label="Restaurant Email"
+                value={values.restaurantEmail}
+              />
+              <FormOutputDisplay
+                label="Restaurant Type"
+                value={values.restaurantType}
+              />
+              <FormOutputDisplay
+                label="Restaurant Cuisine"
+                value={values.restaurantCuisine}
+              />
+
+              <hr />
+              <h4 className="text-xl font-bold mt-4">Manager Details</h4>
+
+              <FormOutputDisplay
+                label="Manager Name"
+                value={values.managerName}
+              />
+              <FormOutputDisplay
+                label="Manager Email"
+                value={values.managerEmail}
+              />
+              <FormOutputDisplay
+                label="Manager Phone"
+                value={values.managerPhone}
+              />
+
+              <hr />
+              <h4 className="text-xl font-bold mt-4">Documents</h4>
+
+              <FormOutputDisplay
+                label="Busines Registration Uploaded?"
+                value={values.dataBRFile ? "Yes" : "No"}
+              />
+              <FormOutputDisplay
+                label="Manager ID Uploaded?"
+                value={values.dataIDFile ? "Yes" : "No"}
+              />
+
+              <h4 className="text-xl font-bold mt-4">Account Details</h4>
+
+              <FormOutputDisplay
+                label="Account Email"
+                value={values.restaurantEmail}
+              />
+              <FormOutputDisplay
+                label="Account Password Set?"
+                value={isValidPasswordSet() ? "Yes" : "No"}
+              />
+            </div>
+
             <div className="flex w-full space-y-3 mt-4 gap-4">
               <div className="w-1/2">
                 <MFButtonSecondary
@@ -481,7 +542,7 @@ export default function RegisterOnboardingForm() {
                   leadingIcon={ArrowLeft}
                   className="w-full"
                   onClick={() => {
-                    setCurrentStep(3);
+                    setCurrentStep(4);
                   }}
                 />
               </div>
@@ -490,9 +551,7 @@ export default function RegisterOnboardingForm() {
                   label="Register Now"
                   trailingIcon={ArrowRight}
                   className="w-full"
-                  onClick={() => {
-                    alert("submitted");
-                  }}
+                  type="submit"
                 />
               </div>
             </div>
