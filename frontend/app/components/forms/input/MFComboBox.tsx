@@ -63,7 +63,10 @@ export default function MFComboBox({
                 <CommandItem
                   key={cuisine.value}
                   value={cuisine.value}
-                  onSelect={onSelect}
+                  onSelect={(value) => {
+                    onSelect(value);
+                    setIsOpen(false);
+                  }}
                 >
                   <CheckIcon
                     className={`

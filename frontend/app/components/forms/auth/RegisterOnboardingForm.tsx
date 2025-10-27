@@ -24,8 +24,9 @@ import { onboardingSchema } from "@/app/schemas/onboarding";
 import { zodResolver } from "@hookform/resolvers/zod";
 import FormFieldErrors from "../FormFieldErrors";
 import z, { string } from "zod";
-import { acceptedFileExts, cuisineTypes } from "@/app/constants";
+import { acceptedFileExts, cuisineTypes, passwordRules } from "@/app/constants";
 import FormOutputDisplay from "../FormOutputDisplay";
+import MFPhoneInput from "../input/MFPhoneInput";
 
 export default function RegisterOnboardingForm() {
   const router = useRouter();
@@ -43,6 +44,7 @@ export default function RegisterOnboardingForm() {
       restaurantName: "",
       restaurantEmail: "",
       restaurantType: "",
+      restaurantPhone: "",
       restaurantCuisine: "",
       managerName: "",
       managerEmail: "",
@@ -62,6 +64,7 @@ export default function RegisterOnboardingForm() {
     .pick({
       restaurantName: true,
       restaurantEmail: true,
+      restaurantPhone: true,
       restaurantType: true,
       restaurantCuisine: true,
     })
@@ -131,6 +134,14 @@ export default function RegisterOnboardingForm() {
     alert("Submitted");
   };
 
+  const _handleOpenFileInNewTab = (file: File | null) => {
+    if (!file) return;
+    const fileURL = URL.createObjectURL(file);
+    window.open(fileURL, "_blank");
+
+    setTimeout(() => URL.revokeObjectURL(fileURL), 100);
+  };
+
   return (
     <FormProvider {...form}>
       <form
@@ -171,6 +182,27 @@ export default function RegisterOnboardingForm() {
               )}
             </div>
             <div className="flex flex-col w-full space-y-3">
+              <Label htmlFor="restaurantPhone">Email*</Label>
+              <Controller
+                control={form.control}
+                key="restaurantPhone"
+                name="restaurantPhone"
+                render={({ field }) => {
+                  return (
+                    <MFPhoneInput
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  );
+                }}
+              />
+              {formState.errors.managerPhone && (
+                <FormFieldErrors
+                  error={formState.errors.managerPhone.message}
+                />
+              )}
+            </div>
+            <div className="flex flex-col w-full space-y-3">
               <Label htmlFor="restaurant-type">Type*</Label>
               <Controller
                 control={form.control}
@@ -204,13 +236,7 @@ export default function RegisterOnboardingForm() {
               <Label htmlFor="category">Cuisine*</Label>
               <MFComboBox
                 options={cuisineTypes}
-                onSelect={(value) =>
-                  setValue("restaurantCuisine", value, {
-                    shouldDirty: true,
-                    shouldTouch: true,
-                    shouldValidate: true,
-                  })
-                }
+                onSelect={(value) => setValue("restaurantCuisine", value)}
                 selection={values.restaurantCuisine}
                 isOpen={isOpen}
                 setIsOpen={(isOpen) => setIsOpen(isOpen)}
@@ -273,11 +299,18 @@ export default function RegisterOnboardingForm() {
             </div>
             <div className="flex flex-col w-full space-y-3">
               <Label htmlFor="managerPhone">Phone*</Label>
-              <Input
-                required
-                type="text"
-                className="w-full p-6 rounded"
-                {...form.register("managerPhone")}
+              <Controller
+                control={form.control}
+                key="managerPhone"
+                name="managerPhone"
+                render={({ field }) => {
+                  return (
+                    <MFPhoneInput
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  );
+                }}
               />
               {formState.errors.managerPhone && (
                 <FormFieldErrors
@@ -324,6 +357,9 @@ export default function RegisterOnboardingForm() {
                       fileName={field.value.name}
                       size={field.value.size}
                       onClick={() => field.onChange(null)}
+                      openFile={() => {
+                        _handleOpenFileInNewTab(field.value);
+                      }}
                     />
                   ) : (
                     <MFUploadArea
@@ -350,6 +386,9 @@ export default function RegisterOnboardingForm() {
                       fileName={field.value.name}
                       size={field.value.size}
                       onClick={() => field.onChange(null)}
+                      openFile={() => {
+                        _handleOpenFileInNewTab(field.value);
+                      }}
                     />
                   ) : (
                     <MFUploadArea
@@ -447,6 +486,13 @@ export default function RegisterOnboardingForm() {
                 <FormFieldErrors error={formState.errors.password2.message} />
               )}
             </div>
+            <div className="bg-gray-200 text-sm p-2 rounded">
+              <ul>
+                {passwordRules.map((rule, index) => {
+                  return <li key={index}>-&gt; {rule}</li>;
+                })}
+              </ul>
+            </div>
             <div className="flex w-full space-y-3 mt-4 gap-4">
               <div className="w-1/2">
                 <MFButtonSecondary
@@ -476,63 +522,77 @@ export default function RegisterOnboardingForm() {
             </h3>
 
             <div className="max-h-[700px] overflow-scroll">
-              <h4 className="text-xl font-bold mt-4">Restaurant Details</h4>
+              <div className="py-5">
+                <h4 className="text-xl font-bold">Restaurant Details</h4>
 
-              <FormOutputDisplay
-                label="Restaurant Name"
-                value={values.restaurantName}
-              />
-              <FormOutputDisplay
-                label="Restaurant Email"
-                value={values.restaurantEmail}
-              />
-              <FormOutputDisplay
-                label="Restaurant Type"
-                value={values.restaurantType}
-              />
-              <FormOutputDisplay
-                label="Restaurant Cuisine"
-                value={values.restaurantCuisine}
-              />
-
-              <hr />
-              <h4 className="text-xl font-bold mt-4">Manager Details</h4>
-
-              <FormOutputDisplay
-                label="Manager Name"
-                value={values.managerName}
-              />
-              <FormOutputDisplay
-                label="Manager Email"
-                value={values.managerEmail}
-              />
-              <FormOutputDisplay
-                label="Manager Phone"
-                value={values.managerPhone}
-              />
+                <FormOutputDisplay
+                  label="Restaurant Name"
+                  value={values.restaurantName}
+                />
+                <FormOutputDisplay
+                  label="Restaurant Email"
+                  value={values.restaurantEmail}
+                />
+                <FormOutputDisplay
+                  label="Restaurant Phone"
+                  value={values.restaurantPhone}
+                />
+                <FormOutputDisplay
+                  label="Restaurant Type"
+                  value={values.restaurantType}
+                />
+                <FormOutputDisplay
+                  label="Restaurant Cuisine"
+                  value={values.restaurantCuisine}
+                />
+              </div>
 
               <hr />
-              <h4 className="text-xl font-bold mt-4">Documents</h4>
+              <div className="py-5">
+                <h4 className="text-xl font-bold">Manager Details</h4>
 
-              <FormOutputDisplay
-                label="Busines Registration Uploaded?"
-                value={values.dataBRFile ? "Yes" : "No"}
-              />
-              <FormOutputDisplay
-                label="Manager ID Uploaded?"
-                value={values.dataIDFile ? "Yes" : "No"}
-              />
+                <FormOutputDisplay
+                  label="Manager Name"
+                  value={values.managerName}
+                />
+                <FormOutputDisplay
+                  label="Manager Email"
+                  value={values.managerEmail}
+                />
+                <FormOutputDisplay
+                  label="Manager Phone"
+                  value={values.managerPhone}
+                />
+              </div>
+              <hr />
 
-              <h4 className="text-xl font-bold mt-4">Account Details</h4>
+              <div className="py-5">
+                <h4 className="text-xl font-bold">Documents</h4>
 
-              <FormOutputDisplay
-                label="Account Email"
-                value={values.restaurantEmail}
-              />
-              <FormOutputDisplay
-                label="Account Password Set?"
-                value={isValidPasswordSet() ? "Yes" : "No"}
-              />
+                <FormOutputDisplay
+                  label="Busines Registration Uploaded?"
+                  value={values.dataBRFile ? "Yes" : "No"}
+                />
+                <FormOutputDisplay
+                  label="Manager ID Uploaded?"
+                  value={values.dataIDFile ? "Yes" : "No"}
+                />
+              </div>
+
+              <hr />
+
+              <div className="py-5">
+                <h4 className="text-xl font-bold">Account Details</h4>
+
+                <FormOutputDisplay
+                  label="Account Email"
+                  value={values.restaurantEmail}
+                />
+                <FormOutputDisplay
+                  label="Account Password Set?"
+                  value={isValidPasswordSet() ? "Yes" : "No"}
+                />
+              </div>
             </div>
 
             <div className="flex w-full space-y-3 mt-4 gap-4">
