@@ -13,15 +13,18 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/app/components/dashboard/sidebar/Sidebar";
+import { dashboardRoles } from "../types/types";
 
-export default function AuthScreenLayout({
+export default function DashboardLayout({
   children,
+  role,
 }: Readonly<{
   children: React.ReactNode;
+  role: dashboardRoles;
 }>) {
   return (
     <SidebarProvider>
-      <AppSidebar />
+      <AppSidebar role={role} />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2">
           <div className="flex items-center gap-2 px-4">
@@ -39,7 +42,7 @@ export default function AuthScreenLayout({
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Data Fetching</BreadcrumbPage>
+                  <BreadcrumbPage>Data Fetching {role}</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>

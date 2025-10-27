@@ -1,3 +1,14 @@
+import {
+  Banknote,
+  Bot,
+  Building2,
+  Coins,
+  List,
+  SquareTerminal,
+  User,
+  Users,
+} from "lucide-react";
+
 export const cuisineTypes = [
   {
     value: "sri-lankan",
@@ -56,3 +67,144 @@ export const passwordRules: string[] = [
   "At least one special character (@, #, $, %, &, *, !, etc.)",
   "No spaces allowed",
 ];
+
+export const adminMenu = {
+  user: {
+    name: "admin user",
+    email: "m@example.com",
+    avatar: "/avatars/shadcn.jpg",
+  },
+  navMain: [
+    {
+      title: "Dashboard",
+      url: "admin/",
+      icon: SquareTerminal,
+      isActive: true,
+    },
+    {
+      title: "Restaurants",
+      url: "#",
+      icon: Building2,
+      items: [
+        {
+          title: "All restaurants",
+          url: "#",
+        },
+        {
+          title: "Create restaurant",
+          url: "#",
+        },
+        {
+          title: "Pending restaurant requests",
+          url: "#",
+        },
+      ],
+    },
+    {
+      title: "Users",
+      url: "#",
+      icon: Users,
+      items: [
+        {
+          title: "All users",
+          url: "#",
+        },
+        {
+          title: "Create user",
+          url: "#",
+        },
+        {
+          title: "Pending user requests",
+          url: "#",
+        },
+      ],
+    },
+  ],
+  navSecondary: [],
+  projects: [],
+};
+
+export const merchantMenu = {
+  user: {
+    name: "Merchant User",
+    email: "m@example.com",
+    avatar: "/avatars/shadcn.jpg",
+  },
+  navMain: [
+    {
+      title: "Dashboard",
+      url: "admin/",
+      icon: SquareTerminal,
+      isActive: true,
+    },
+    {
+      title: "Orders",
+      url: "#",
+      icon: Building2,
+      items: [
+        {
+          title: "All Orders",
+          url: "#",
+        },
+        {
+          title: "Pending orders",
+          url: "#",
+        },
+        {
+          title: "Rejected orders",
+          url: "#",
+        },
+        {
+          title: "User cancelled orders",
+          url: "#",
+        },
+      ],
+    },
+    {
+      title: "Menu",
+      url: "#",
+      icon: List,
+    },
+    {
+      title: "Restraunt Details",
+      url: "#",
+      icon: Building2,
+    },
+    {
+      title: "Customers",
+      url: "#",
+      icon: Users,
+      items: [
+        {
+          title: "All users",
+          url: "#",
+        },
+        {
+          title: "Create user",
+          url: "#",
+        },
+        {
+          title: "Pending user requests",
+          url: "#",
+        },
+      ],
+    },
+    {
+      title: "Payouts",
+      url: "#",
+      icon: Banknote,
+      items: [
+        {
+          title: "Payouts",
+          url: "#",
+        },
+        {
+          title: "Bank Details",
+          url: "#",
+        },
+      ],
+    },
+  ],
+  navSecondary: [],
+  projects: [],
+};
